@@ -25,16 +25,20 @@ int page;
 
 Arduino_ST7789 display = Arduino_ST7789(TFT_DC, TFT_RST, TFT_CS);
 
-#define ORANGE      RGBto565( 255, 128,  64)
-#define GREY        RGBto565( 127, 127, 127)
-#define DARKGREY    RGBto565(  64,  64,  64)
-#define TURQUOISE   RGBto565(   0, 128, 128)  // TOO DARK
-#define PINK2       RGBto565( 255, 128, 192)  // IS BRIGHT
-#define PINK        RGBto565( 255,   0, 100)  // my version of it :-)
-#define OLIVE       RGBto565( 128, 128,   0)  // NOT BAD
-#define PURPLE      RGBto565( 255,   0, 128)  // edited, was 128, 0, 128 // DARK BUT NICE
-#define AZURE       RGBto565(   0, 128, 255)  // VERY NICE, GOES PERFECT WIT BLUE
-#define BROWN       RGBto565( 120,  60,  30)
+#define ORANGE      255, 128,  64
+#define GREY        127, 127, 127
+#define DARKGREY     64,  64,  64
+#define TURQUOISE     0, 128, 128  // TOO DARK
+//#define RED         255,   0,   0
+#define PINK2       255, 128, 192  // IS BRIGHT
+#define PINK        255,   0, 100  // my version of it :-)
+#define PINK3       128,   0,  64
+#define OLIVE       128, 128,   0  // NOT BAD
+#define GREEN         0, 128,   0
+#define PURPLE      255,   0, 128  // edited, was 128, 0, 128 // DARK BUT NICE
+#define DARKPURPLE  128,   0, 128
+#define AZURE         0, 128, 255  // VERY NICE, GOES PERFECT WIT BLUE
+#define BROWN       120,  60,  30
 
 #define KEYCOLOR1   RGBto565( 255,   0, 228)
 #define KEYCOLOR2   RGBto565(   0, 255, 255)
@@ -42,6 +46,7 @@ Arduino_ST7789 display = Arduino_ST7789(TFT_DC, TFT_RST, TFT_CS);
 #define KEYCOLOR4   RGBto565(   0, 255,   0)
 #define KEYCOLOR5   RGBto565(  10,  10,  10)
 #define KEYCOLOR6   RGBto565(   0, 255, 255)
+#define KEYCOLOR7   RGBto565( 255,   0, 255)
 
 const int analogInPin = A5;                   // Analog input pin that the LDR is attached to
 const int analogOutPin = 3;                   // Analog/PWM output pin that the Transistor is attached to
@@ -163,7 +168,7 @@ void setup() {
   Timer1.attachInterrupt(timerIsr);
 
   for (int i = 0; i < NUMPIXELS; i++) {
-    pixels.setPixelColor(i, pixels.Color(0, 128, 128));
+    pixels.setPixelColor(i, pixels.Color(TURQUOISE));
     pixels.show();
     delay(delayval);
   }
@@ -198,11 +203,11 @@ void setup() {
   display.setCursor( 78, 190);
   display.print("10.2020");
 
-  display.drawBitmap( 51,   3, KEYPADTOP, 138, 6, WHITE);
-  display.drawBitmap(129,   3, TOUCH, 46, 3, RED);
-  display.drawBitmap( 51,  6, KEYPADSIDE, 3, 167, WHITE);
-  display.drawBitmap(186,  6, KEYPADSIDE, 3, 167, WHITE);
-  display.drawBitmap( 51, 172, KEYPAD, 138, 64, WHITE);
+  display.drawBitmap( 51,   3, KEYPADTOP, 138,   6, WHITE);
+  display.drawBitmap(129,   3, TOUCH,      46,   3, RED);
+  display.drawBitmap( 51,   6, KEYPADSIDE,  3, 167, WHITE);
+  display.drawBitmap(186,   6, KEYPADSIDE,  3, 167, WHITE);
+  display.drawBitmap( 51, 172, KEYPAD,    138,  64, WHITE);
 
   // fade in from min to max in increments of 5 points:
   for (int fadeValue = 0 ; fadeValue <= 255; fadeValue += 5) {
@@ -359,19 +364,18 @@ void setColor(uint32_t c) {
   if (page == 0)
   {
     //  strip.setPixelColor(0, 128,   0,  64);  // 1  clockwise counting !!!
-    strip.setPixelColor(1,   0, 128, 128);  // 2
-    strip.setPixelColor(2, 128,   0,  64);  // 3
-    strip.setPixelColor(3,   0, 128, 128);  // 4
-    strip.setPixelColor(4,   0, 128, 128);  // 5
-    strip.setPixelColor(5,   0, 128, 128);  // 6
+    strip.setPixelColor(1, TURQUOISE);  // 2
+    strip.setPixelColor(2, PINK3);  // 3
+    strip.setPixelColor(3, TURQUOISE);  // 4
+    strip.setPixelColor(4, TURQUOISE);  // 5
+    strip.setPixelColor(5, TURQUOISE);  // 6
 
-    strip.show();
+    
     // Boolean Checks to make sure that we haven't done this before
     if (OledClear == true) {
 
       Keys();      // clears the text or bitmap on the keys :-)
 
-      display.drawBitmap(   0,   80, KEYCAP, 76, 76, KEYCOLOR1);
       display.drawBitmap(  80,   80, KEYCAP, 76, 76, KEYCOLOR2);
       display.drawBitmap( 160,   80, KEYCAP, 76, 76, KEYCOLOR1);
       display.drawBitmap(   0,  160, KEYCAP, 76, 76, KEYCOLOR2);
@@ -379,16 +383,14 @@ void setColor(uint32_t c) {
       display.drawBitmap( 160,  160, KEYCAP, 76, 76, KEYCOLOR2);
 
       display.setTextColor(WHITE, BLACK);
-      display.setCursor( 14, 99);
-      display.print("Caps");
-      display.setCursor( 14, 121);
-      display.print("Lock");
+      textkey("CapsLock", 0, PINK3, KEYCOLOR1);
       display.drawBitmap(106,  104,   ARROWUP,  24, 29, WHITE);
       display.drawBitmap(191,  106,    PAUSE2,  14, 24, WHITE);
       display.drawBitmap( 23,  186, ARROWLEFT,  29, 24, WHITE);
       display.drawBitmap(106,  185, ARROWDOWN,  24, 29, WHITE);
       display.drawBitmap(185,  186, ARROWRIGHT, 29, 24, WHITE);
 
+      strip.show();
       OledClear = false;
     }
     //Up Arrow//
@@ -476,7 +478,7 @@ void setColor(uint32_t c) {
     //      }
 
     if (BootKeyboard.getLeds() & LED_CAPS_LOCK) {
-      strip.setPixelColor(0, 255,   0,  0);  // 1
+      strip.setPixelColor(0, 255, 0 ,0);  // 1
       //      strip.setPixelColor(1, 255,   0,  0);  // 2
       //      strip.setPixelColor(2, 255,   0,  0);  // 3
       //      strip.setPixelColor(3, 255,   0,  0);  // 4
@@ -491,7 +493,7 @@ void setColor(uint32_t c) {
     }
     else
 
-      strip.setPixelColor(0, 128,   0,  64);  // 1
+      strip.setPixelColor(0, PINK3);  // 1
     //      strip.setPixelColor(1,   0, 128, 128);  // 2
     //      strip.setPixelColor(2, 128,   0,  64);  // 3
     //      strip.setPixelColor(3,   0, 128, 128);  // 4
@@ -515,40 +517,19 @@ void setColor(uint32_t c) {
 
   else if (page == 1)
   {
-    strip.setPixelColor(0, 128, 128, 0);
-    strip.setPixelColor(1, 128, 128, 0);
-    strip.setPixelColor(2, 128, 128, 0);
-    strip.setPixelColor(3, 128, 0, 128);
-    strip.setPixelColor(4, 128, 0, 128);
-    strip.setPixelColor(5, 128, 0, 128);
-
-    strip.show();
-
     // Make sure that we aren't constantly clearing the display
     if (OledClear == true)
     {
       Keys();
 
-      display.drawBitmap(   0,   80, KEYCAP, 76, 76, KEYCOLOR3);
-      display.drawBitmap(  80,   80, KEYCAP, 76, 76, KEYCOLOR3);
-      display.drawBitmap( 160,   80, KEYCAP, 76, 76, KEYCOLOR3);
-      display.drawBitmap(   0,  160, KEYCAP, 76, 76, KEYCOLOR1);
-      display.drawBitmap(  80,  160, KEYCAP, 76, 76, KEYCOLOR1);
-      display.drawBitmap( 160,  160, KEYCAP, 76, 76, KEYCOLOR1);
+      textkey("ESC", 0, OLIVE, KEYCOLOR3);
+      textkey("HOME", 1, OLIVE, KEYCOLOR3);
+      textkey("PRSC", 2, OLIVE, KEYCOLOR3);
+      textkey("DSLA", 3, PINK3, KEYCOLOR1);
+      textkey("END", 4, PINK3, KEYCOLOR1);
+      textkey("SAVE", 5, PINK3, KEYCOLOR1);
 
-      display.setCursor( 21, 111);
-      display.print("ESC");
-      display.setCursor(94, 111);
-      display.print("HOME");
-      display.setCursor(174, 111);  // 185, 108
-      display.print("PRSC");
-      display.setCursor( 14, 191);
-      display.print("DSLA");
-      display.setCursor(101, 191);
-      display.print("END");
-      display.setCursor(174, 191);
-      display.print("SAVE");
-
+      strip.show();
       OledClear = false;
     }
 
@@ -621,40 +602,19 @@ void setColor(uint32_t c) {
   // Third Layer Programming
   else
   {
-    strip.setPixelColor(0, 128, 0, 128);
-    strip.setPixelColor(1, 0, 128, 0);
-    strip.setPixelColor(2, 128, 0, 128);
-    strip.setPixelColor(3, 0, 128, 0);
-    strip.setPixelColor(4, 0, 128, 0);
-    strip.setPixelColor(5, 0, 128, 0);
-
-    strip.show();
-
     // Make sure that we aren't constantly clearing the display
     if (OledClear == true)
     {
       Keys();
 
-      display.drawBitmap(   0,   80, KEYCAP, 76, 76, KEYCOLOR1);
-      display.drawBitmap(  80,   80, KEYCAP, 76, 76, KEYCOLOR4);
-      display.drawBitmap( 160,   80, KEYCAP, 76, 76, KEYCOLOR1);
-      display.drawBitmap(   0,  160, KEYCAP, 76, 76, KEYCOLOR4);
-      display.drawBitmap(  80,  160, KEYCAP, 76, 76, KEYCOLOR4);
-      display.drawBitmap( 160,  160, KEYCAP, 76, 76, KEYCOLOR4);
+      textkey("Q", 0, DARKPURPLE, KEYCOLOR7);
+      textkey("W", 1, GREEN, KEYCOLOR4);
+      textkey("E", 2, DARKPURPLE, KEYCOLOR7);
+      textkey("A", 3, GREEN, KEYCOLOR4);
+      textkey("S", 4, GREEN, KEYCOLOR4);
+      textkey("D", 5, GREEN, KEYCOLOR4);
 
-      display.setCursor( 33, 111);
-      display.print("Q");
-      display.setCursor(113, 111);
-      display.print("W");
-      display.setCursor(193, 111);
-      display.print("E");
-      display.setCursor( 33, 191);
-      display.print("A");
-      display.setCursor(113, 191);
-      display.print("S");
-      display.setCursor(193, 191);
-      display.print("D");
-
+      strip.show();
       OledClear = false;
     }
 
@@ -753,6 +713,58 @@ void  Keys() {
   display.fillRect( 14, 175, 48, 46, BLACK);
   display.fillRect( 94, 175, 48, 46, BLACK);
   display.fillRect(174, 175, 48, 46, BLACK);
+}
+
+void textkey(String disptext, int posi, int color1, int color2, int color3 , int keycolor) {
+  int text_length = disptext.length();
+  int x_pos;
+  int x_pos1;
+  int y_pos;
+
+  strip.setPixelColor(posi, color1, color2, color3);
+  // Top or Bottom Row
+  if (posi < 3)
+  {
+    x_pos = posi*80;
+    y_pos = 99;
+    display.drawBitmap(x_pos, 80, KEYCAP, 76, 76, keycolor);
+  }
+  else
+  {
+    x_pos = (posi-3)*80;
+    y_pos = 179;
+    display.drawBitmap(x_pos, 160, KEYCAP, 76, 76, keycolor);
+  }
+  // Line Break
+  if (text_length > 4)
+  {
+    x_pos1 = x_pos + 14;
+    display.setCursor(x_pos1, y_pos);
+    display.print(disptext.substring(0,4));
+    disptext.remove(0,4);
+    y_pos = y_pos + 22; 
+    text_length -= 4;
+  }
+  else
+  {
+    y_pos = y_pos + 12;
+  }
+  switch (text_length) {
+    case 1:
+      x_pos += 33;
+      break;
+    case 2:
+      x_pos += 27;
+      break;
+    case 3:
+      x_pos += 21;
+      break;
+    default:
+      x_pos += 14;
+      break;
+  }
+  display.setCursor(x_pos, y_pos);
+  display.print(disptext);
 }
 
 //**************************************************************************** lightSensor()
