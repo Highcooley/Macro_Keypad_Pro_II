@@ -1,5 +1,6 @@
 // Macro Keypad Pro by Hayri 27.07.2020
 // edited to latest PCB version 30.10.2020
+// edited to have more than two layers by HighC 24.03.2023
 // USE THIS FROM NOW ON!!!
 
 #include <SPI.h>
@@ -18,6 +19,10 @@
 #define SCR_WD   240
 #define SCR_HT   240
 
+int sw_detect;
+int sw_old;
+int page;  
+
 Arduino_ST7789 display = Arduino_ST7789(TFT_DC, TFT_RST, TFT_CS);
 
 #define ORANGE      RGBto565( 255, 128,  64)
@@ -34,7 +39,7 @@ Arduino_ST7789 display = Arduino_ST7789(TFT_DC, TFT_RST, TFT_CS);
 #define KEYCOLOR1   RGBto565( 255,   0, 228)
 #define KEYCOLOR2   RGBto565(   0, 255, 255)
 #define KEYCOLOR3   RGBto565( 255, 255,   0)
-#define KEYCOLOR4   RGBto565( 255,   0, 255)
+#define KEYCOLOR4   RGBto565(   0, 255,   0)
 #define KEYCOLOR5   RGBto565(  10,  10,  10)
 #define KEYCOLOR6   RGBto565(   0, 255, 255)
 
@@ -335,7 +340,23 @@ void setColor(uint32_t c) {
   }
   strip_a.show();
 
-  if (digitalRead(Switch) == LOW)
+  // Toggle through pages
+  sw_detect = digitalRead(Switch);
+  if (sw_detect != sw_old)
+  {
+    sw_old = sw_detect;
+    if (page >= 2)
+    {
+      page = 0;
+    }
+    else
+    {
+      page += 1;
+    }
+    OledClear = true;
+  }
+  
+  if (page == 0)
   {
     //  strip.setPixelColor(0, 128,   0,  64);  // 1  clockwise counting !!!
     strip.setPixelColor(1,   0, 128, 128);  // 2
@@ -492,7 +513,7 @@ void setColor(uint32_t c) {
 
   // Second Layer Programming
 
-  else if (digitalRead(Switch) == HIGH)
+  else if (page == 1)
   {
     strip.setPixelColor(0, 128, 128, 0);
     strip.setPixelColor(1, 128, 128, 0);
@@ -504,16 +525,16 @@ void setColor(uint32_t c) {
     strip.show();
 
     // Make sure that we aren't constantly clearing the display
-    if (OledClear == false)
+    if (OledClear == true)
     {
       Keys();
 
       display.drawBitmap(   0,   80, KEYCAP, 76, 76, KEYCOLOR3);
       display.drawBitmap(  80,   80, KEYCAP, 76, 76, KEYCOLOR3);
       display.drawBitmap( 160,   80, KEYCAP, 76, 76, KEYCOLOR3);
-      display.drawBitmap(   0,  160, KEYCAP, 76, 76, KEYCOLOR4);
-      display.drawBitmap(  80,  160, KEYCAP, 76, 76, KEYCOLOR4);
-      display.drawBitmap( 160,  160, KEYCAP, 76, 76, KEYCOLOR4);
+      display.drawBitmap(   0,  160, KEYCAP, 76, 76, KEYCOLOR1);
+      display.drawBitmap(  80,  160, KEYCAP, 76, 76, KEYCOLOR1);
+      display.drawBitmap( 160,  160, KEYCAP, 76, 76, KEYCOLOR1);
 
       display.setCursor( 21, 111);
       display.print("ESC");
@@ -528,7 +549,7 @@ void setColor(uint32_t c) {
       display.setCursor(174, 191);
       display.print("SAVE");
 
-      OledClear = true;
+      OledClear = false;
     }
 
     //Up Arrow//
@@ -591,6 +612,110 @@ void setColor(uint32_t c) {
     if (digitalRead(LUp) == HIGH)
     {
       Keyboard.release(KEY_ESC);
+    }
+  }
+  
+  ////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
+
+  // Third Layer Programming
+  else
+  {
+    strip.setPixelColor(0, 128, 0, 128);
+    strip.setPixelColor(1, 0, 128, 0);
+    strip.setPixelColor(2, 128, 0, 128);
+    strip.setPixelColor(3, 0, 128, 0);
+    strip.setPixelColor(4, 0, 128, 0);
+    strip.setPixelColor(5, 0, 128, 0);
+
+    strip.show();
+
+    // Make sure that we aren't constantly clearing the display
+    if (OledClear == true)
+    {
+      Keys();
+
+      display.drawBitmap(   0,   80, KEYCAP, 76, 76, KEYCOLOR1);
+      display.drawBitmap(  80,   80, KEYCAP, 76, 76, KEYCOLOR4);
+      display.drawBitmap( 160,   80, KEYCAP, 76, 76, KEYCOLOR1);
+      display.drawBitmap(   0,  160, KEYCAP, 76, 76, KEYCOLOR4);
+      display.drawBitmap(  80,  160, KEYCAP, 76, 76, KEYCOLOR4);
+      display.drawBitmap( 160,  160, KEYCAP, 76, 76, KEYCOLOR4);
+
+      display.setCursor( 33, 111);
+      display.print("Q");
+      display.setCursor(113, 111);
+      display.print("W");
+      display.setCursor(193, 111);
+      display.print("E");
+      display.setCursor( 33, 191);
+      display.print("A");
+      display.setCursor(113, 191);
+      display.print("S");
+      display.setCursor(193, 191);
+      display.print("D");
+
+      OledClear = false;
+    }
+
+    //Up Arrow//
+    if (digitalRead(Up) == LOW)
+    {
+      Keyboard.press(KEY_W);
+    }
+    if (digitalRead(Up) == HIGH)
+    {
+      Keyboard.release(KEY_W);
+    }
+
+    //Down Arrow//
+    if (digitalRead(Down) == LOW)
+    {
+      Keyboard.press(KEY_S);
+    }
+    if (digitalRead(Down) == HIGH)
+    {
+      Keyboard.release(KEY_S);
+    }
+
+    //Right Arrow//
+    if (digitalRead(Right) == LOW)
+    {
+      Keyboard.press(KEY_D);
+    }
+    if (digitalRead(Right) == HIGH)
+    {
+      Keyboard.release(KEY_D);
+    }
+
+    //Left Arrow//
+    if (digitalRead(Left) == LOW)
+    {
+      Keyboard.press(KEY_A);
+    }
+    if (digitalRead(Left) == HIGH)
+    {
+      Keyboard.release(KEY_A);
+    }
+
+    //Top Right Button//
+    if (digitalRead(RUp) == LOW)
+    {
+      Keyboard.press(KEY_E);
+    }
+    if (digitalRead(RUp) == HIGH)
+    {
+      Keyboard.release(KEY_E);
+    }
+
+    //Top Left Button//
+    if (digitalRead(LUp) == LOW)
+    {
+      Keyboard.press(KEY_Q);
+    }
+    if (digitalRead(LUp) == HIGH)
+    {
+      Keyboard.release(KEY_Q);
     }
   }
 }
